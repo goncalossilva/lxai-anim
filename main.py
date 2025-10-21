@@ -1,0 +1,169 @@
+#!/usr/bin/env python3
+import time
+import sys
+import signal
+from renderer import TerminalRenderer
+from clouds import CloudSystem
+from typography import LXAITypography
+from keyboard import KeyboardHandler
+
+
+class Animation:
+    """Main animation controller."""
+
+    def __init__(self, fps=30, logo_style="bold", render_style="dots"):
+        """
+        Initialize the animation.
+
+        Args:
+            fps: Target frames per second
+            logo_style: Style for the LisbonAI logo
+            render_style: Rendering style for dithering
+        """
+        self.fps = fps
+        self.frame_time = 1.0 / fps
+        self.running = False
+        self.start_time = 0
+        self.elapsed_time = 0
+
+        # Initialize components
+        self.renderer = TerminalRenderer(style=render_style)
+        self.clouds = CloudSystem(self.renderer.width, self.renderer.height)
+        self.typography = LXAITypography(style=logo_style)
+        self.keyboard = KeyboardHandler()
+
+        # Animation parameters
+        self.logo_fade_duration = 3.0
+        self.logo_float_amplitude = 3.0
+        self.logo_float_frequency = 0.3
+
+        # Auto-cycling parameters
+        self.auto_cycle_enabled = True
+        self.auto_cycle_interval = 30.0  # in seconds
+        self.last_style_change = 0.0
+
+    def setup(self):
+        """Setup the animation."""
+        self.renderer.hide_cursor()
+        self.keyboard.setup()
+        self.start_time = time.time()
+        self.running = True
+
+    def cleanup(self):
+        """Cleanup and restore terminal."""
+        self.keyboard.cleanup()
+        self.renderer.show_cursor()
+        self.renderer.clear_buffer()
+        self.renderer.render()
+
+    def handle_input(self):
+        """Handle keyboard input."""
+        key = self.keyboard.get_key()
+        if key:
+            if key == "n":
+                # Cycle to next rendering style and disable auto-cycling
+                self.auto_cycle_enabled = False
+                self.renderer.next_style()
+            elif key == "m":
+                # Cycle to next text/logo style
+                self.typography.next_style()
+            elif key == "q":
+                # Quit the animation
+                self.running = False
+
+    def update(self, delta_time):
+        """Update animation state."""
+        self.elapsed_time = time.time() - self.start_time
+        self.clouds.update(delta_time)
+
+        # Auto-cycle rendering styles every 30 seconds if enabled
+        if self.auto_cycle_enabled:
+            if self.elapsed_time - self.last_style_change >= self.auto_cycle_interval:
+                self.renderer.next_style()
+                self.last_style_change = self.elapsed_time
+
+    def render(self):
+        """Render the current frame."""
+        # Clear buffer
+        self.renderer.clear_buffer()
+
+        # Render cloud layers
+        self.clouds.render(self.renderer)
+
+        # Render LisbonAI typography at bottom-right, fixed position
+        self.typography.render_bottom_right(
+            self.renderer, margin_x=10, margin_y=2, opacity=1.0
+        )
+
+        # Display to terminal
+        self.renderer.render()
+
+    def run(self):
+        """Main animation loop."""
+        self.setup()
+
+        try:
+            last_time = time.time()
+
+            while self.running:
+                current_time = time.time()
+                delta_time = current_time - last_time
+                last_time = current_time
+
+                # Handle input
+                self.handle_input()
+
+                # Update and render
+                self.update(delta_time)
+                self.render()
+
+                # Frame timing
+                frame_end = time.time()
+                sleep_time = self.frame_time - (frame_end - current_time)
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
+
+        except KeyboardInterrupt:
+            pass
+        finally:
+            self.cleanup()
+
+
+def signal_handler(sig, frame):
+    """Handle Ctrl+C gracefully."""
+    sys.exit(0)
+
+
+def main():
+    """Entry point for the LisbonAI animation."""
+    # Setup signal handler
+    signal.signal(signal.SIGINT, signal_handler)
+
+    # Parse arguments (simple version)
+    fps = 30
+    style = "bold"
+    render_style = "dots"
+
+    if len(sys.argv) > 1:
+        if "--fps" in sys.argv:
+            idx = sys.argv.index("--fps")
+            if idx + 1 < len(sys.argv):
+                fps = int(sys.argv[idx + 1])
+
+        if "--style" in sys.argv:
+            idx = sys.argv.index("--style")
+            if idx + 1 < len(sys.argv):
+                style = sys.argv[idx + 1]
+
+        if "--render-style" in sys.argv:
+            idx = sys.argv.index("--render-style")
+            if idx + 1 < len(sys.argv):
+                render_style = sys.argv[idx + 1]
+
+    # Run animation
+    animation = Animation(fps=fps, logo_style=style, render_style=render_style)
+    animation.run()
+
+
+if __name__ == "__main__":
+    main()
