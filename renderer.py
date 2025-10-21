@@ -30,11 +30,9 @@ class TerminalRenderer:
             style: Character set style - 'dots', 'stipple', 'fine', 'blocks', or 'density'
             output: Output stream (default: sys.stdout)
         """
-        self.width, self.height = self._get_terminal_size()
-        if width:
-            self.width = min(width, self.width)
-        if height:
-            self.height = min(height, self.height)
+        term_width, term_height = self._get_terminal_size()
+        self.width = width if width and width > 0 else term_width
+        self.height = height if height and height > 0 else term_height
 
         self.output = output or sys.stdout
 
