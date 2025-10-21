@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# SSH host key
+ssh_host_key

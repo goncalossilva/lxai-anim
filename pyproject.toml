@@ -3,4 +3,4 @@ name = "lxai-anim"
 version = "0.1.0"
 description = "Terminal animation for LisbonAI, babeh"
 requires-python = ">=3.12"
-dependencies = ["noise>=1.2.2"]
+dependencies = ["asyncssh>=2.13.2", "noise>=1.2.2"]

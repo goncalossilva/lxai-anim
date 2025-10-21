@@ -165,3 +165,17 @@ class CloudSystem:
             for x in range(renderer.width):
                 density = self.get_combined_density(x, y)
                 renderer.set_pixel(x, y, density)
+
+    def resize(self, width, height):
+        """
+        Resize all cloud layers to match a new viewport.
+
+        Args:
+            width: New width in characters
+            height: New height in characters
+        """
+        self.width = width
+        self.height = height
+        for layer in self.layers:
+            layer.width = width
+            layer.height = height

@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 
 class TerminalRenderer:
@@ -20,7 +20,7 @@ class TerminalRenderer:
     # Fine dot gradient
     FINE_DOTS = " .·˙∙⋅∘○◌●◉⦿"
 
-    def __init__(self, width=None, height=None, style="dots"):
+    def __init__(self, width=None, height=None, style="dots", output=None):
         """
         Initialize the renderer.
 
@@ -28,12 +28,15 @@ class TerminalRenderer:
             width: Terminal width (auto-detected if None)
             height: Terminal height (auto-detected if None)
             style: Character set style - 'dots', 'stipple', 'fine', 'blocks', or 'density'
+            output: Output stream (default: sys.stdout)
         """
         self.width, self.height = self._get_terminal_size()
         if width:
             self.width = min(width, self.width)
         if height:
             self.height = min(height, self.height)
+
+        self.output = output or sys.stdout
 
         # Select character set based on style
         self.styles = {
@@ -86,26 +89,26 @@ class TerminalRenderer:
             new_density = max(current_density, density)
             self.set_pixel(x, y, new_density)
 
-    def render(self):
-        """Render the buffer to the terminal."""
-        # Move cursor to top-left and clear screen
-        sys.stdout.write("\033[H\033[2J")
-
-        # Render each line
-        for row in self.buffer:
-            sys.stdout.write("".join(row) + "\n")
-
-        sys.stdout.flush()
+    def render(self, output=None):
+        """Render the buffer to the terminal or provided stream."""
+        data = "\r\n".join("".join(row) for row in self.buffer)
+        data = f"\033[2J\033[H{data}\r"
+        target = output or self.output
+        target.write(data)
+        if hasattr(target, "flush"):
+            target.flush()
 
     def hide_cursor(self):
         """Hide the terminal cursor."""
-        sys.stdout.write("\033[?25l")
-        sys.stdout.flush()
+        self.output.write("\033[?25l")
+        if hasattr(self.output, "flush"):
+            self.output.flush()
 
     def show_cursor(self):
         """Show the terminal cursor."""
-        sys.stdout.write("\033[?25h")
-        sys.stdout.flush()
+        self.output.write("\033[?25h")
+        if hasattr(self.output, "flush"):
+            self.output.flush()
 
     def set_style(self, style):
         """
@@ -124,3 +127,15 @@ class TerminalRenderer:
         next_index = (current_index + 1) % len(self.style_names)
         self.set_style(self.style_names[next_index])
         return self.current_style
+
+    def resize(self, width, height):
+        """
+        Resize the renderer to new dimensions.
+
+        Args:
+            width: New width in characters
+            height: New height in characters
+        """
+        self.width = width
+        self.height = height
+        self.clear_buffer()
