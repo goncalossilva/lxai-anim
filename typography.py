@@ -183,19 +183,18 @@ class LXAITypography:
             if 0 <= y < renderer.height:
                 for j, char in enumerate(line):
                     x = x_start + j
-                    if 0 <= x < renderer.width:
-                        if char != " ":
-                            # Apply opacity by blending with background
-                            if opacity >= 1.0:
+                    if 0 <= x < renderer.width and char != " ":
+                        # Apply opacity by blending with background
+                        if opacity >= 1.0:
+                            renderer.buffer[y][x] = char
+                        else:
+                            # For partial opacity, use lighter characters
+                            if opacity > 0.7:
                                 renderer.buffer[y][x] = char
-                            else:
-                                # For partial opacity, use lighter characters
-                                if opacity > 0.7:
-                                    renderer.buffer[y][x] = char
-                                elif opacity > 0.4:
-                                    renderer.buffer[y][x] = "░"
-                                elif opacity > 0.2:
-                                    renderer.buffer[y][x] = "·"
+                            elif opacity > 0.4:
+                                renderer.buffer[y][x] = "░"
+                            elif opacity > 0.2:
+                                renderer.buffer[y][x] = "·"
 
     def render_at(
         self, renderer: TerminalRenderer, x: int, y: int, opacity: float = 1.0
@@ -214,17 +213,16 @@ class LXAITypography:
             if 0 <= row < renderer.height:
                 for j, char in enumerate(line):
                     col = x + j
-                    if 0 <= col < renderer.width:
-                        if char != " ":
-                            if opacity >= 1.0:
+                    if 0 <= col < renderer.width and char != " ":
+                        if opacity >= 1.0:
+                            renderer.buffer[row][col] = char
+                        else:
+                            if opacity > 0.7:
                                 renderer.buffer[row][col] = char
-                            else:
-                                if opacity > 0.7:
-                                    renderer.buffer[row][col] = char
-                                elif opacity > 0.4:
-                                    renderer.buffer[row][col] = "░"
-                                elif opacity > 0.2:
-                                    renderer.buffer[row][col] = "·"
+                            elif opacity > 0.4:
+                                renderer.buffer[row][col] = "░"
+                            elif opacity > 0.2:
+                                renderer.buffer[row][col] = "·"
 
     def render_bottom_right(
         self,

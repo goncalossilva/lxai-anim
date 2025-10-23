@@ -81,10 +81,12 @@ class Animation:
         self.clouds.update(delta_time)
 
         # Auto-cycle rendering styles every 30 seconds if enabled
-        if self.auto_cycle_enabled:
-            if self.elapsed_time - self.last_style_change >= self.auto_cycle_interval:
-                self.renderer.next_style()
-                self.last_style_change = self.elapsed_time
+        if (
+            self.auto_cycle_enabled
+            and self.elapsed_time - self.last_style_change >= self.auto_cycle_interval
+        ):
+            self.renderer.next_style()
+            self.last_style_change = self.elapsed_time
 
     def render(self) -> None:
         """Render the current frame."""

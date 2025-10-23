@@ -80,9 +80,8 @@ class TerminalRenderer:
     def draw_text(self, x: int, y: int, text: str, char: str = "█") -> None:
         """Draw text at position."""
         for i, ch in enumerate(text):
-            if 0 <= x + i < self.width and 0 <= y < self.height:
-                if ch != " ":
-                    self.buffer[y][x + i] = char
+            if 0 <= x + i < self.width and 0 <= y < self.height and ch != " ":
+                self.buffer[y][x + i] = char
 
     def blend_pixel(self, x: int, y: int, density: float) -> None:
         """Blend a new density value with existing pixel."""

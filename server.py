@@ -6,6 +6,7 @@ import asyncio
 import os
 import stat
 import time
+from contextlib import suppress
 from pathlib import Path
 from typing import Any
 
@@ -35,11 +36,9 @@ def ensure_host_key(path: Path) -> asyncssh.SSHKey:
 
     key = asyncssh.generate_private_key("ssh-ed25519")
     path.write_bytes(key.export_private_key())
-    try:
+    # On non-POSIX systems chmod may fail; ignore quietly.
+    with suppress(PermissionError):
         os.chmod(path, stat.S_IRUSR | stat.S_IWUSR)
-    except PermissionError:
-        # On non-POSIX systems chmod may fail; ignore quietly.
-        pass
     return key
 
 
@@ -127,9 +126,7 @@ class SSHAnimationSession:
                 self.renderer.next_style()
             elif key == "m":
                 self.typography.next_style()
-            elif key == "q":
-                self.running = False
-            elif key in ("\x03", "\x04"):  # Ctrl+C / Ctrl+D
+            elif key == "q" or key in ("\x03", "\x04"):  # q, Ctrl+C, or Ctrl+D
                 self.running = False
 
     def _update(self, delta_time: float) -> None:
@@ -137,10 +134,12 @@ class SSHAnimationSession:
         self.elapsed_time = time.monotonic() - self.start_time  # type: ignore[operator]
         self.clouds.update(delta_time)
 
-        if self.auto_cycle_enabled:
-            if self.elapsed_time - self.last_style_change >= self.auto_cycle_interval:
-                self.renderer.next_style()
-                self.last_style_change = self.elapsed_time
+        if (
+            self.auto_cycle_enabled
+            and self.elapsed_time - self.last_style_change >= self.auto_cycle_interval
+        ):
+            self.renderer.next_style()
+            self.last_style_change = self.elapsed_time
 
     async def _render_frame(self) -> None:
         """Render a single frame to the SSH channel."""
