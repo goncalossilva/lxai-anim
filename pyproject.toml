@@ -2,12 +2,12 @@
 name = "lxai-anim"
 version = "0.1.0"
 description = "Terminal animation for LisbonAI, babeh"
-requires-python = ">=3.14"
+requires-python = ">=3.13"
 dependencies = ["asyncssh>=2.13.2", "noise>=1.2.2"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py314"
+target-version = "py313"
 
 [tool.ruff.lint]
 select = [
