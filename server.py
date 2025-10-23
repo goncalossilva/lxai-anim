@@ -16,7 +16,7 @@ from renderer import TerminalRenderer
 from typography import LXAITypography
 
 HOST_KEY_FILENAME: str = "ssh_host_key"
-DEFAULT_HOST: str = "0.0.0.0"
+DEFAULT_HOST: str = "0.0.0.0"  # noqa: S104
 DEFAULT_PORT: int = 2222
 
 
@@ -243,7 +243,7 @@ class LXAIAnimationSession(asyncssh.SSHServerSession):
         try:
             cols, rows = self.channel.get_terminal_size()
             return cols or 80, rows or 24
-        except Exception:
+        except Exception:  # noqa: BLE001
             return 80, 24
 
     def signal_received(self, signal: str) -> bool:

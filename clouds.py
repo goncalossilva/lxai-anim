@@ -43,7 +43,7 @@ class CloudLayer:
         self.octaves: int = octaves
         self.persistence: float = persistence
         self.lacunarity: float = lacunarity
-        self.seed: int = seed if seed is not None else random.randint(0, 1000)
+        self.seed: int = seed if seed is not None else random.randint(0, 1000)  # noqa: S311
         self.offset_x: float = 0.0
         self.offset_y: float = 0.0
 

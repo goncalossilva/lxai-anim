@@ -230,7 +230,7 @@ class LXAITypography:
         margin_x: int = 10,
         margin_y: int = 10,
         opacity: float = 1.0,
-        with_background: bool = False,
+        with_background: bool = False,  # noqa: FBT001, FBT002
     ) -> None:
         """
         Render the logo at bottom-right corner.

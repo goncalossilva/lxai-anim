@@ -11,52 +11,37 @@ target-version = "py314"
 
 [tool.ruff.lint]
 select = [
-    "A",        # Detect shadowed builtins
-    "B",        # Bugbear (common bugs)
-    "BLE",      # Disallow catch-all exceptions
-    "C4",       # Catch incorrect use of comprehensions, dict, list, etc
-    "C90",      # McCabe complexity
-    "COM",      # Enforce trailing comma rules
-    "DTZ",      # Require strict timezone manipulation with datetime
-    "E",        # PyCodeStyle errors
-    "F",        # Pyflakes rules
-    "FA",       # Enforce from __future__ import annotations
-    "FBT",      # Detect boolean traps
-    "I",        # Sort imports properly
-    "ICN",      # Use common import conventions
-    "ISC",      # Good use of string concatenation
-    "N",        # Enforce naming conventions
-    "PTH",      # Use pathlib instead of os.path
-    "RET",      # Good return practices
-    "S",        # Security checks
-    "SIM",      # Common simplification rules
-    "TC",       # Enforce importing certain types in a TYPE_CHECKING block
-    "TD",       # Be diligent with TODO comments
-    "TID",      # Some good import practices
-    "UP",       # Warn if certain things can changed due to newer Python versions
-    "W",        # PyCodeStyle warnings
+    "A",        # flake8-builtins
+    "B",        # flake8-bugbear
+    "BLE",      # flake8-blind-except
+    "C4",       # flake8-comprehensions
+    "C90",      # mccabe
+    "COM",      # flake8-commas
+    "DTZ",      # flake8-datetimez
+    "E",        # pycodestyle (errors)
+    "F",        # Pyflakes
+    "FA",       # flake8-future-annotations
+    "FBT",      # flake8-boolean-trap
+    "I",        # isort
+    "ICN",      # flake8-import-conventions
+    "ISC",      # flake8-implicit-str-concat
+    "N",        # pep8-naming
+    "PTH",      # flake8-use-pathlib
+    "RET",      # flake8-return
+    "S",        # flake8-bandit
+    "SIM",      # flake8-simplify
+    "TC",       # flake8-type-checking
+    "TD",       # flake8-todos
+    "TID",      # flake8-tidy-imports
+    "UP",       # pyupgrade
+    "W",        # pycodestyle (warnings)
 ]
 ignore = [
     "B905",    # zip() without explicit strict parameter
 ]
 
-[tool.ruff.lint.per-file-ignores]
-"clouds.py" = [
-    "S311",    # Random generator fine for animation seed generation
-]
-"server.py" = [
-    "S104",    # Binding to all interfaces is intentional for SSH server
-    "BLE001",  # Catch-all exception is fallback for terminal size detection
-]
-"typography.py" = [
-    "FBT001",  # Boolean parameter with_background is clear when named
-    "FBT002",  # Boolean default with_background is clear when named
-]
-
 [dependency-groups]
 dev = [
     "ruff>=0.14.2",
+    "ty>=0.0.1a24",
 ]
-
-# Note: ty (type checker) should be run via `uvx ty check .`
-# It's pre-alpha software (0.0.1-alpha.24) and not added as a dependency
