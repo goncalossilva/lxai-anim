@@ -21,3 +21,6 @@ ignore = [
 dev = [
     "ruff>=0.14.2",
 ]
+
+# Note: ty (type checker) should be run via `uvx ty check .`
+# It's pre-alpha software (0.0.1-alpha.24) and not added as a dependency
