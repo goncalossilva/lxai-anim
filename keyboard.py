@@ -1,7 +1,7 @@
+import select
 import sys
 import termios
 import tty
-import select
 from typing import Any
 
 

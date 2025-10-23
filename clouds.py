@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import noise
 import random
 from typing import TYPE_CHECKING
+
+import noise
 
 if TYPE_CHECKING:
     from renderer import TerminalRenderer

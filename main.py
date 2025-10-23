@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import time
-import sys
 import signal
+import sys
+import time
 from types import FrameType
-from renderer import TerminalRenderer
+
 from clouds import CloudSystem
-from typography import LXAITypography
 from keyboard import KeyboardHandler
+from renderer import TerminalRenderer
+from typography import LXAITypography
 
 
 class Animation:

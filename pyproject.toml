@@ -12,7 +12,6 @@ target-version = "py314"
 [tool.ruff.lint]
 select = ["E", "F", "W", "C90", "I", "N", "UP", "B", "A", "C4", "SIM", "RET"]
 ignore = [
-    "I001",    # Import block is un-sorted or un-formatted
     "RET504",  # Unnecessary assignment before return
     "RET505",  # Unnecessary else after return
     "B905",    # zip() without explicit strict parameter
