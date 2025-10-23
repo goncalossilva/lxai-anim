@@ -108,7 +108,7 @@ class CloudSystem:
                 octaves=3,
                 persistence=0.6,
                 seed=42,
-            )
+            ),
         )
 
         # Mid-ground layer - medium speed, medium features
@@ -121,7 +121,7 @@ class CloudSystem:
                 octaves=4,
                 persistence=0.55,
                 seed=123,
-            )
+            ),
         )
 
         # Foreground layer - fast, smaller features with more detail
@@ -134,7 +134,7 @@ class CloudSystem:
                 octaves=5,
                 persistence=0.5,
                 seed=456,
-            )
+            ),
         )
 
     def update(self, delta_time: float) -> None:

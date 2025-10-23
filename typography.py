@@ -163,7 +163,7 @@ class LXAITypography:
         self.height: int = len(self.logo)
 
     def render_centered(
-        self, renderer: TerminalRenderer, y_offset: int = 0, opacity: float = 1.0
+        self, renderer: TerminalRenderer, y_offset: int = 0, opacity: float = 1.0,
     ) -> None:
         """
         Render the logo centered in the renderer.
@@ -197,7 +197,7 @@ class LXAITypography:
                                 renderer.buffer[y][x] = "·"
 
     def render_at(
-        self, renderer: TerminalRenderer, x: int, y: int, opacity: float = 1.0
+        self, renderer: TerminalRenderer, x: int, y: int, opacity: float = 1.0,
     ) -> None:
         """
         Render the logo at specific coordinates.
@@ -252,7 +252,7 @@ class LXAITypography:
         self.render_at(renderer, x, y, opacity)
 
     def _render_background(
-        self, renderer: TerminalRenderer, x: int, y: int, padding: int = 1
+        self, renderer: TerminalRenderer, x: int, y: int, padding: int = 1,
     ) -> None:
         """
         Render a background box behind the logo.

@@ -10,12 +10,48 @@ line-length = 100
 target-version = "py314"
 
 [tool.ruff.lint]
-select = ["E", "F", "W", "C90", "I", "N", "UP", "B", "A", "C4", "SIM", "RET"]
+select = [
+    "A",        # Detect shadowed builtins
+    "B",        # Bugbear (common bugs)
+    "BLE",      # Disallow catch-all exceptions
+    "C4",       # Catch incorrect use of comprehensions, dict, list, etc
+    "C90",      # McCabe complexity
+    "COM",      # Enforce trailing comma rules
+    "DTZ",      # Require strict timezone manipulation with datetime
+    "E",        # PyCodeStyle errors
+    "F",        # Pyflakes rules
+    "FA",       # Enforce from __future__ import annotations
+    "FBT",      # Detect boolean traps
+    "I",        # Sort imports properly
+    "ICN",      # Use common import conventions
+    "ISC",      # Good use of string concatenation
+    "N",        # Enforce naming conventions
+    "PTH",      # Use pathlib instead of os.path
+    "RET",      # Good return practices
+    "S",        # Security checks
+    "SIM",      # Common simplification rules
+    "TC",       # Enforce importing certain types in a TYPE_CHECKING block
+    "TD",       # Be diligent with TODO comments
+    "TID",      # Some good import practices
+    "UP",       # Warn if certain things can changed due to newer Python versions
+    "W",        # PyCodeStyle warnings
+]
 ignore = [
     "B905",    # zip() without explicit strict parameter
 ]
 
 [tool.ruff.lint.per-file-ignores]
+"clouds.py" = [
+    "S311",    # Random generator fine for animation seed generation
+]
+"server.py" = [
+    "S104",    # Binding to all interfaces is intentional for SSH server
+    "BLE001",  # Catch-all exception is fallback for terminal size detection
+]
+"typography.py" = [
+    "FBT001",  # Boolean parameter with_background is clear when named
+    "FBT002",  # Boolean default with_background is clear when named
+]
 
 [dependency-groups]
 dev = [
