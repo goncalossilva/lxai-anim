@@ -78,17 +78,14 @@ class CloudLayer:
         density = (value + 1.0) / 2.0
 
         # Apply contrast curve to make clouds more distinct and show dithering better
-        density = self._apply_contrast(density, power=2.5)
-
-        return density
+        return self._apply_contrast(density, power=2.5)
 
     def _apply_contrast(self, value: float, power: float = 2.5) -> float:
         """Apply contrast curve to make clouds more distinct and enhance dithering."""
         # Use a power curve to increase contrast
         if value < 0.5:
             return 0.5 * pow(2 * value, power)
-        else:
-            return 1.0 - 0.5 * pow(2 * (1 - value), power)
+        return 1.0 - 0.5 * pow(2 * (1 - value), power)
 
 
 class CloudSystem:
