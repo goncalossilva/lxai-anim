@@ -1,8 +1,15 @@
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from renderer import TerminalRenderer
+
+
 class LXAITypography:
     """Handles LisbonAI logo rendering with multiple styles."""
 
     # Large block-style LisbonAI logo
-    LOGO_LARGE = [
+    LOGO_LARGE: list[str] = [
         "██╗     ██╗███████╗██████╗  ██████╗ ███╗   ██╗ █████╗ ██╗",
         "██║     ██║██╔════╝██╔══██╗██╔═══██╗████╗  ██║██╔══██╗██║",
         "██║     ██║███████╗██████╔╝██║   ██║██╔██╗ ██║███████║██║",
@@ -12,7 +19,7 @@ class LXAITypography:
     ]
 
     # Medium block-style
-    LOGO_MEDIUM = [
+    LOGO_MEDIUM: list[str] = [
         "██╗     ██╗███████╗██████╗  ██████╗ ███╗   ██╗ █████╗ ██╗",
         "██║     ██║██╔════╝██╔══██╗██╔═══██╗████╗  ██║██╔══██╗██║",
         "██║     ██║███████╗██████╔╝██║   ██║██╔██╗ ██║███████║██║",
@@ -21,14 +28,14 @@ class LXAITypography:
     ]
 
     # Sleek minimal style
-    LOGO_MINIMAL = [
+    LOGO_MINIMAL: list[str] = [
         "╦  ╦╔═╗╔╗ ╔═╗╔╗╔  ╔═╗╦",
         "║  ║╚═╗╠╩╗║ ║║║║  ╠═╣║",
         "╩═╝╩╚═╝╚═╝╚═╝╝╚╝  ╩ ╩╩",
     ]
 
     # ASCII art style
-    LOGO_ASCII = [
+    LOGO_ASCII: list[str] = [
         " _     ___ ____  ____   ___  _   _    _    ___ ",
         "| |   |_ _/ ___|| __ ) / _ \\| \\ | |  / \\  |_ _|",
         "| |    | |\\___ \\|  _ \\| | | |  \\| | / _ \\  | | ",
@@ -37,7 +44,7 @@ class LXAITypography:
     ]
 
     # Slant style
-    LOGO_SLANT = [
+    LOGO_SLANT: list[str] = [
         "   ____        __             ___   ____",
         "  / / /____   / /_  ___  ___ / _ | /  _/",
         " / / /(_-<  / _ \\/ _ \\/ _ / __ |_/ /  ",
@@ -45,12 +52,12 @@ class LXAITypography:
     ]
 
     # Simple compact style
-    LOGO_SIMPLE = [
+    LOGO_SIMPLE: list[str] = [
         "LisbonAI",
     ]
 
     # Stipple/dot styles - using heavier dot characters for visibility
-    LOGO_DOTS = [
+    LOGO_DOTS: list[str] = [
         "●●   ●● ●●●●● ●●●●   ●●●●  ●●●  ●●  ●  ●●●  ●●",
         "●●   ●● ●●    ●●  ●● ●●  ●● ●● ●● ●● ●● ●● ●● ●●",
         "●●   ●● ●●●●● ●●●●   ●●  ●● ●● ●● ●●●●● ●●●●● ●●",
@@ -58,7 +65,7 @@ class LXAITypography:
         "●●●●●●● ●●●●● ●●●●    ●●●●   ●●●  ●● ●  ●● ●● ●●",
     ]
 
-    LOGO_CIRCLES = [
+    LOGO_CIRCLES: list[str] = [
         "○○   ○○ ○○○○○ ○○○○   ○○○○  ○○○  ○○  ○  ○○○  ○○",
         "○○   ○○ ○○    ○○  ○○ ○○  ○○ ○○ ○○ ○○ ○○ ○○ ○○ ○○",
         "○○   ○○ ○○○○○ ○○○○   ○○  ○○ ○○ ○○ ○○○○○ ○○○○○ ○○",
@@ -66,7 +73,7 @@ class LXAITypography:
         "○○○○○○○ ○○○○○ ○○○○    ○○○○   ○○○  ○○ ○  ○○ ○○ ○○",
     ]
 
-    LOGO_MIXED_DOTS = [
+    LOGO_MIXED_DOTS: list[str] = [
         "●●   ●● ●●●●● ●●●●   ●●●●  ●●●  ●●  ●  ●●●  ●●",
         "●●   ●● ●●    ●●  ●● ●●  ●● ●● ●● ●● ●● ●● ●● ●●",
         "●●   ●● ●●●●● ●●●●   ●●  ●● ○○ ○○ ○○○○○ ○○○○○ ●●",
@@ -74,7 +81,7 @@ class LXAITypography:
         "●●●●●●● ●●●●● ●●●●    ●●●●   ●●●  ●● ●  ●● ●● ●●",
     ]
 
-    LOGO_STIPPLE = [
+    LOGO_STIPPLE: list[str] = [
         "∙∙   ∙∙ ∙∙∙∙∙ ∙∙∙∙   ∙∙∙∙  ∙∙∙  ∙∙  ∙  ∙∙∙  ∙∙",
         "∙∙   ∙∙ ∙∙    ∙∙  ∙∙ ∙∙  ∙∙ ∙∙ ∙∙ ∙∙ ∙∙ ∙∙ ∙∙ ∙∙",
         "∙∙   ∙∙ ∙∙∙∙∙ ∙∙∙∙   ∙∙  ∙∙ ∙∙ ∙∙ ∙∙∙∙∙ ∙∙∙∙∙ ∙∙",
@@ -83,7 +90,7 @@ class LXAITypography:
     ]
 
     # Extra large bold block style - highly visible
-    LOGO_HUGE = [
+    LOGO_HUGE: list[str] = [
         "██╗     ██╗███████╗██████╗  ██████╗ ███╗   ██╗ █████╗ ██╗",
         "██║     ██║██╔════╝██╔══██╗██╔═══██╗████╗  ██║██╔══██╗██║",
         "██║     ██║███████╗██████╔╝██║   ██║██╔██╗ ██║███████║██║",
@@ -94,7 +101,7 @@ class LXAITypography:
     ]
 
     # Double-height block characters for maximum visibility
-    LOGO_DOUBLE = [
+    LOGO_DOUBLE: list[str] = [
         "██╗     ██╗███████╗██████╗  ██████╗ ███╗   ██╗ █████╗ ██╗",
         "██║     ██║██╔════╝██╔══██╗██╔═══██╗████╗  ██║██╔══██╗██║",
         "██║     ██║███████╗██████╔╝██║   ██║██╔██╗ ██║███████║██║",
@@ -106,7 +113,7 @@ class LXAITypography:
     ]
 
     # Bold dots - extra thick for visibility
-    LOGO_BOLD_DOTS = [
+    LOGO_BOLD_DOTS: list[str] = [
         "⬤⬤⬤   ⬤⬤⬤ ⬤⬤⬤⬤⬤⬤⬤ ⬤⬤⬤⬤⬤   ⬤⬤⬤⬤⬤⬤  ⬤⬤⬤⬤  ⬤⬤⬤  ⬤⬤   ⬤⬤⬤⬤  ⬤⬤⬤",
         "⬤⬤⬤   ⬤⬤⬤ ⬤⬤⬤      ⬤⬤⬤  ⬤⬤⬤ ⬤⬤⬤  ⬤⬤⬤ ⬤⬤⬤ ⬤⬤⬤ ⬤⬤⬤ ⬤⬤⬤ ⬤⬤⬤ ⬤⬤⬤ ⬤⬤⬤",
         "⬤⬤⬤   ⬤⬤⬤ ⬤⬤⬤⬤⬤⬤⬤ ⬤⬤⬤⬤⬤⬤   ⬤⬤⬤  ⬤⬤⬤ ⬤⬤⬤ ⬤⬤⬤ ⬤⬤⬤⬤⬤⬤⬤ ⬤⬤⬤⬤⬤⬤⬤ ⬤⬤⬤",
@@ -115,7 +122,7 @@ class LXAITypography:
     ]
 
     # Clean bold ASCII - very readable
-    LOGO_BOLD_ASCII = [
+    LOGO_BOLD_ASCII: list[str] = [
         "██      ██ ███████ ██████   ██████  ███  ██  ████  ██",
         "██      ██ ██      ██   ██ ██    ██ ████ ██ ██  ██ ██",
         "██      ██ ███████ ██████  ██    ██ ██ ████ ██████ ██",
@@ -123,7 +130,7 @@ class LXAITypography:
         "███████ ██ ███████ ██████   ██████  ██   ██ ██  ██ ██",
     ]
 
-    def __init__(self, style="bold"):
+    def __init__(self, style: str = "bold") -> None:
         """
         Initialize typography with a specific style.
 
@@ -132,7 +139,7 @@ class LXAITypography:
                    'large', 'medium', 'minimal', 'ascii', 'slant', 'simple',
                    'dots', 'circles', 'mixed', 'stipple'
         """
-        self.styles = {
+        self.styles: dict[str, list[str]] = {
             "bold": self.LOGO_BOLD_ASCII,
             "bold_dots": self.LOGO_BOLD_DOTS,
             "huge": self.LOGO_HUGE,
@@ -148,13 +155,15 @@ class LXAITypography:
             "simple": self.LOGO_SIMPLE,
             "mixed": self.LOGO_MIXED_DOTS,
         }
-        self.style_names = list(self.styles.keys())
-        self.current_style = style if style in self.styles else "bold"
-        self.logo = self.styles[self.current_style]
-        self.width = max(len(line) for line in self.logo)
-        self.height = len(self.logo)
+        self.style_names: list[str] = list(self.styles.keys())
+        self.current_style: str = style if style in self.styles else "bold"
+        self.logo: list[str] = self.styles[self.current_style]
+        self.width: int = max(len(line) for line in self.logo)
+        self.height: int = len(self.logo)
 
-    def render_centered(self, renderer, y_offset=0, opacity=1.0):
+    def render_centered(
+        self, renderer: TerminalRenderer, y_offset: int = 0, opacity: float = 1.0
+    ) -> None:
         """
         Render the logo centered in the renderer.
 
@@ -187,7 +196,9 @@ class LXAITypography:
                                 elif opacity > 0.2:
                                     renderer.buffer[y][x] = "·"
 
-    def render_at(self, renderer, x, y, opacity=1.0):
+    def render_at(
+        self, renderer: TerminalRenderer, x: int, y: int, opacity: float = 1.0
+    ) -> None:
         """
         Render the logo at specific coordinates.
 
@@ -215,8 +226,13 @@ class LXAITypography:
                                     renderer.buffer[row][col] = "·"
 
     def render_bottom_right(
-        self, renderer, margin_x=10, margin_y=10, opacity=1.0, with_background=False
-    ):
+        self,
+        renderer: TerminalRenderer,
+        margin_x: int = 10,
+        margin_y: int = 10,
+        opacity: float = 1.0,
+        with_background: bool = False,
+    ) -> None:
         """
         Render the logo at bottom-right corner.
 
@@ -236,7 +252,9 @@ class LXAITypography:
 
         self.render_at(renderer, x, y, opacity)
 
-    def _render_background(self, renderer, x, y, padding=1):
+    def _render_background(
+        self, renderer: TerminalRenderer, x: int, y: int, padding: int = 1
+    ) -> None:
         """
         Render a background box behind the logo.
 
@@ -254,7 +272,7 @@ class LXAITypography:
                 if 0 <= row < renderer.height and 0 <= col < renderer.width:
                     renderer.buffer[row][col] = bg_char
 
-    def set_style(self, style):
+    def set_style(self, style: str) -> None:
         """
         Change the logo style.
 
@@ -267,7 +285,7 @@ class LXAITypography:
             self.width = max(len(line) for line in self.logo)
             self.height = len(self.logo)
 
-    def next_style(self):
+    def next_style(self) -> str:
         """Cycle to the next logo style."""
         current_index = self.style_names.index(self.current_style)
         next_index = (current_index + 1) % len(self.style_names)

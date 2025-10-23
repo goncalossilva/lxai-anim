@@ -1,5 +1,11 @@
+from __future__ import annotations
+
 import noise
 import random
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from renderer import TerminalRenderer
 
 
 class CloudLayer:
@@ -7,15 +13,15 @@ class CloudLayer:
 
     def __init__(
         self,
-        width,
-        height,
-        speed=1.0,
-        scale=0.1,
-        octaves=3,
-        persistence=0.5,
-        lacunarity=2.0,
-        seed=None,
-    ):
+        width: int,
+        height: int,
+        speed: float = 1.0,
+        scale: float = 0.1,
+        octaves: int = 3,
+        persistence: float = 0.5,
+        lacunarity: float = 2.0,
+        seed: int | None = None,
+    ) -> None:
         """
         Initialize a cloud layer.
 
@@ -29,22 +35,22 @@ class CloudLayer:
             lacunarity: Frequency multiplier per octave
             seed: Random seed for reproducible noise
         """
-        self.width = width
-        self.height = height
-        self.speed = speed
-        self.scale = scale
-        self.octaves = octaves
-        self.persistence = persistence
-        self.lacunarity = lacunarity
-        self.seed = seed if seed is not None else random.randint(0, 1000)
-        self.offset_x = 0.0
-        self.offset_y = 0.0
+        self.width: int = width
+        self.height: int = height
+        self.speed: float = speed
+        self.scale: float = scale
+        self.octaves: int = octaves
+        self.persistence: float = persistence
+        self.lacunarity: float = lacunarity
+        self.seed: int = seed if seed is not None else random.randint(0, 1000)
+        self.offset_x: float = 0.0
+        self.offset_y: float = 0.0
 
-    def update(self, delta_time):
+    def update(self, delta_time: float) -> None:
         """Update the cloud layer position."""
         self.offset_x += self.speed * delta_time
 
-    def get_density(self, x, y):
+    def get_density(self, x: int, y: int) -> float:
         """
         Get cloud density at position (x, y).
 
@@ -75,7 +81,7 @@ class CloudLayer:
 
         return density
 
-    def _apply_contrast(self, value, power=2.5):
+    def _apply_contrast(self, value: float, power: float = 2.5) -> float:
         """Apply contrast curve to make clouds more distinct and enhance dithering."""
         # Use a power curve to increase contrast
         if value < 0.5:
@@ -87,11 +93,11 @@ class CloudLayer:
 class CloudSystem:
     """Manages multiple parallax cloud layers."""
 
-    def __init__(self, width, height):
+    def __init__(self, width: int, height: int) -> None:
         """Initialize the cloud system with multiple layers."""
-        self.width = width
-        self.height = height
-        self.layers = []
+        self.width: int = width
+        self.height: int = height
+        self.layers: list[CloudLayer] = []
 
         # Create multiple cloud layers with different parameters
         # Background layer - slow, large features, subtle
@@ -133,12 +139,12 @@ class CloudSystem:
             )
         )
 
-    def update(self, delta_time):
+    def update(self, delta_time: float) -> None:
         """Update all cloud layers."""
         for layer in self.layers:
             layer.update(delta_time)
 
-    def get_combined_density(self, x, y):
+    def get_combined_density(self, x: int, y: int) -> float:
         """
         Get combined density from all layers at position (x, y).
 
@@ -159,14 +165,14 @@ class CloudSystem:
         # Clamp to [0, 1]
         return max(0.0, min(1.0, total_density))
 
-    def render(self, renderer):
+    def render(self, renderer: TerminalRenderer) -> None:
         """Render all cloud layers to the renderer."""
         for y in range(renderer.height):
             for x in range(renderer.width):
                 density = self.get_combined_density(x, y)
                 renderer.set_pixel(x, y, density)
 
-    def resize(self, width, height):
+    def resize(self, width: int, height: int) -> None:
         """
         Resize all cloud layers to match a new viewport.
 

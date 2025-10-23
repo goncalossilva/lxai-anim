@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
+from __future__ import annotations
+
 import argparse
 import asyncio
 import os
 import stat
 import time
 from pathlib import Path
+from typing import Any
 
 import asyncssh
 
@@ -12,9 +15,9 @@ from clouds import CloudSystem
 from renderer import TerminalRenderer
 from typography import LXAITypography
 
-HOST_KEY_FILENAME = "ssh_host_key"
-DEFAULT_HOST = "0.0.0.0"
-DEFAULT_PORT = 2222
+HOST_KEY_FILENAME: str = "ssh_host_key"
+DEFAULT_HOST: str = "0.0.0.0"
+DEFAULT_PORT: int = 2222
 
 
 def ensure_host_key(path: Path) -> asyncssh.SSHKey:
@@ -43,26 +46,34 @@ def ensure_host_key(path: Path) -> asyncssh.SSHKey:
 class SSHAnimationSession:
     """Run the LisbonAI animation inside an SSH channel."""
 
-    def __init__(self, channel, width, height, fps, logo_style, render_style):
-        self.channel = channel
-        self.fps = fps
-        self.frame_time = 1.0 / fps
-        self.renderer = TerminalRenderer(
+    def __init__(
+        self,
+        channel: Any,
+        width: int,
+        height: int,
+        fps: int,
+        logo_style: str,
+        render_style: str,
+    ) -> None:
+        self.channel: Any = channel
+        self.fps: int = fps
+        self.frame_time: float = 1.0 / fps
+        self.renderer: TerminalRenderer = TerminalRenderer(
             width=width, height=height, style=render_style, output=channel
         )
-        self.clouds = CloudSystem(self.renderer.width, self.renderer.height)
-        self.typography = LXAITypography(style=logo_style)
+        self.clouds: CloudSystem = CloudSystem(self.renderer.width, self.renderer.height)
+        self.typography: LXAITypography = LXAITypography(style=logo_style)
 
-        self.running = True
-        self.auto_cycle_enabled = True
-        self.auto_cycle_interval = 30.0
-        self.last_style_change = 0.0
+        self.running: bool = True
+        self.auto_cycle_enabled: bool = True
+        self.auto_cycle_interval: float = 30.0
+        self.last_style_change: float = 0.0
 
-        self.start_time = None
-        self.elapsed_time = 0.0
-        self.key_queue = asyncio.Queue(maxsize=256)
+        self.start_time: float | None = None
+        self.elapsed_time: float = 0.0
+        self.key_queue: asyncio.Queue[str] = asyncio.Queue(maxsize=256)
 
-    def queue_keys(self, data: str):
+    def queue_keys(self, data: str) -> None:
         """Enqueue incoming characters for later processing."""
         for char in data:
             if char:
@@ -72,11 +83,11 @@ class SSHAnimationSession:
                     # Drop excess input to keep animation responsive.
                     break
 
-    def stop(self):
+    def stop(self) -> None:
         """Request the animation loop to stop."""
         self.running = False
 
-    async def run(self):
+    async def run(self) -> None:
         """Run the animation loop until stopped or the channel closes."""
         self.start_time = time.monotonic()
         last_time = self.start_time
@@ -103,7 +114,7 @@ class SSHAnimationSession:
         finally:
             await self._cleanup()
 
-    async def _handle_input(self):
+    async def _handle_input(self) -> None:
         """Process any pending keyboard input."""
         while True:
             try:
@@ -121,9 +132,9 @@ class SSHAnimationSession:
             elif key in ("\x03", "\x04"):  # Ctrl+C / Ctrl+D
                 self.running = False
 
-    def _update(self, delta_time: float):
+    def _update(self, delta_time: float) -> None:
         """Update animation state based on elapsed time."""
-        self.elapsed_time = time.monotonic() - self.start_time
+        self.elapsed_time = time.monotonic() - self.start_time  # type: ignore[operator]
         self.clouds.update(delta_time)
 
         if self.auto_cycle_enabled:
@@ -131,7 +142,7 @@ class SSHAnimationSession:
                 self.renderer.next_style()
                 self.last_style_change = self.elapsed_time
 
-    async def _render_frame(self):
+    async def _render_frame(self) -> None:
         """Render a single frame to the SSH channel."""
         self.renderer.clear_buffer()
         self.clouds.render(self.renderer)
@@ -139,14 +150,14 @@ class SSHAnimationSession:
             self.renderer, margin_x=10, margin_y=2, opacity=1.0
         )
 
-        frame_data = self.renderer.render_to_string()
+        frame_data = self.renderer.render_to_string()  # type: ignore[attr-defined]
         try:
             self.channel.write(frame_data)
             await self._drain_channel()
         except (asyncssh.Error, OSError):
             self.running = False
 
-    async def _cleanup(self):
+    async def _cleanup(self) -> None:
         """Restore terminal state and clear the screen."""
         try:
             self.renderer.show_cursor()
@@ -156,13 +167,13 @@ class SSHAnimationSession:
         except (asyncssh.Error, OSError):
             pass
 
-    async def _drain_channel(self):
+    async def _drain_channel(self) -> None:
         """Flush pending output if the writer supports draining."""
         drain = getattr(self.channel, "drain", None)
         if callable(drain):
             await drain()
 
-    def resize(self, width: int, height: int):
+    def resize(self, width: int, height: int) -> None:
         """Handle terminal resizes from the client."""
         self.renderer.resize(width, height)
         self.clouds.resize(width, height)
@@ -171,17 +182,19 @@ class SSHAnimationSession:
 class LXAIAnimationSession(asyncssh.SSHServerSession):
     """AsyncSSH session wrapper for the animation."""
 
-    def __init__(self, config):
-        self.config = config
-        self.channel = None
-        self.animation = None
-        self.animation_task = None
-        self.pending_size = None
+    def __init__(self, config: dict[str, Any]) -> None:
+        self.config: dict[str, Any] = config
+        self.channel: Any = None
+        self.animation: SSHAnimationSession | None = None
+        self.animation_task: asyncio.Task[None] | None = None
+        self.pending_size: tuple[int, int] | None = None
 
-    def connection_made(self, chan):
+    def connection_made(self, chan: Any) -> None:
         self.channel = chan
 
-    def pty_requested(self, term_type, term_size, term_modes):
+    def pty_requested(
+        self, term_type: str, term_size: tuple[int, int, int, int], term_modes: dict[int, int]
+    ) -> bool:
         width = height = 0
         if term_size:
             width, height, _, _ = term_size
@@ -190,10 +203,10 @@ class LXAIAnimationSession(asyncssh.SSHServerSession):
         self.pending_size = (cols, rows)
         return True
 
-    def shell_requested(self):
+    def shell_requested(self) -> bool:
         return True
 
-    def session_started(self):
+    def session_started(self) -> None:
         cols, rows = self._get_initial_size()
         self.animation = SSHAnimationSession(
             channel=self.channel,
@@ -206,26 +219,26 @@ class LXAIAnimationSession(asyncssh.SSHServerSession):
         loop = asyncio.get_running_loop()
         self.animation_task = loop.create_task(self.animation.run())
 
-    def data_received(self, data, datatype):
+    def data_received(self, data: str, datatype: int) -> None:
         if self.animation:
             self.animation.queue_keys(data)
 
-    def terminal_size_changed(self, width, height, pixwidth, pixheight):
+    def terminal_size_changed(self, width: int, height: int, pixwidth: int, pixheight: int) -> None:
         if self.animation:
             self.animation.resize(width, height)
 
-    def eof_received(self):
+    def eof_received(self) -> bool:
         if self.animation:
             self.animation.stop()
         return True
 
-    def connection_lost(self, exc):
+    def connection_lost(self, exc: Exception | None) -> None:
         if self.animation:
             self.animation.stop()
         if self.animation_task:
             self.animation_task.cancel()
 
-    def _get_initial_size(self):
+    def _get_initial_size(self) -> tuple[int, int]:
         """Fallback-aware terminal size detection."""
         if self.pending_size:
             return self.pending_size
@@ -235,7 +248,7 @@ class LXAIAnimationSession(asyncssh.SSHServerSession):
         except Exception:
             return 80, 24
 
-    def signal_received(self, signal):
+    def signal_received(self, signal: str) -> bool:
         if self.animation:
             self.animation.stop()
         return True
@@ -244,19 +257,19 @@ class LXAIAnimationSession(asyncssh.SSHServerSession):
 class LXAIAnimationServer(asyncssh.SSHServer):
     """SSH server which skips authentication and serves animation sessions."""
 
-    def __init__(self, config):
+    def __init__(self, config: dict[str, Any]) -> None:
         super().__init__()
-        self.config = config
+        self.config: dict[str, Any] = config
 
-    def begin_auth(self, username):
+    def begin_auth(self, username: str) -> bool:
         """Allow clients to connect without authentication."""
         return False
 
-    def session_requested(self):
+    def session_requested(self) -> LXAIAnimationSession:
         return LXAIAnimationSession(self.config)
 
 
-async def run_server(host, port, config):
+async def run_server(host: str, port: int, config: dict[str, Any]) -> None:
     """Start the AsyncSSH server and serve forever."""
     host_key_path = Path(__file__).with_name(HOST_KEY_FILENAME)
     host_key = ensure_host_key(host_key_path)
@@ -272,7 +285,7 @@ async def run_server(host, port, config):
         await server.wait_closed()
 
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Serve the LisbonAI animation over SSH."
     )
@@ -293,7 +306,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
+def main() -> None:
     args = parse_args()
     config = {
         "fps": args.fps,
