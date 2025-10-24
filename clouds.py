@@ -153,7 +153,7 @@ class CloudSystem:
         total_density = 0.0
         weights = [0.25, 0.35, 0.4]  # Weight each layer (foreground gets more)
 
-        for layer, weight in zip(self.layers, weights):
+        for layer, weight in zip(self.layers, weights, strict=True):
             density = layer.get_density(x, y)
             total_density += density * weight
 
