@@ -2,5 +2,46 @@
 name = "lxai-anim"
 version = "0.1.0"
 description = "Terminal animation for LisbonAI, babeh"
-requires-python = ">=3.12"
-dependencies = ["asyncssh>=2.13.2", "noise>=1.2.2"]
+requires-python = ">=3.13"
+dependencies = ["asyncssh>=2.21.1", "noise>=1.2.2"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "A",        # flake8-builtins
+    "B",        # flake8-bugbear
+    "BLE",      # flake8-blind-except
+    "C4",       # flake8-comprehensions
+    "C90",      # mccabe
+    "COM",      # flake8-commas
+    "DTZ",      # flake8-datetimez
+    "E",        # pycodestyle (errors)
+    "F",        # Pyflakes
+    "FA",       # flake8-future-annotations
+    "FBT",      # flake8-boolean-trap
+    "I",        # isort
+    "ICN",      # flake8-import-conventions
+    "ISC",      # flake8-implicit-str-concat
+    "N",        # pep8-naming
+    "PTH",      # flake8-use-pathlib
+    "RET",      # flake8-return
+    "S",        # flake8-bandit
+    "SIM",      # flake8-simplify
+    "TC",       # flake8-type-checking
+    "TD",       # flake8-todos
+    "TID",      # flake8-tidy-imports
+    "UP",       # pyupgrade
+    "W",        # pycodestyle (warnings)
+]
+ignore = [
+    "COM812",   # missing-trailing-comma (conflicts with formatter)
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.2",
+    "ty>=0.0.1a24",
+]

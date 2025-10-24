@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
-import time
-import sys
+from __future__ import annotations
+
 import signal
-from renderer import TerminalRenderer
+import sys
+import time
+from typing import TYPE_CHECKING
+
 from clouds import CloudSystem
-from typography import LXAITypography
 from keyboard import KeyboardHandler
+from renderer import TerminalRenderer
+from typography import LXAITypography
+
+if TYPE_CHECKING:
+    from types import FrameType
 
 
 class Animation:
     """Main animation controller."""
 
-    def __init__(self, fps=30, logo_style="bold", render_style="dots"):
+    def __init__(self, fps: int = 30, logo_style: str = "bold", render_style: str = "dots") -> None:
         """
         Initialize the animation.
 
@@ -20,43 +27,43 @@ class Animation:
             logo_style: Style for the LisbonAI logo
             render_style: Rendering style for dithering
         """
-        self.fps = fps
-        self.frame_time = 1.0 / fps
-        self.running = False
-        self.start_time = 0
-        self.elapsed_time = 0
+        self.fps: int = fps
+        self.frame_time: float = 1.0 / fps
+        self.running: bool = False
+        self.start_time: float = 0.0
+        self.elapsed_time: float = 0.0
 
         # Initialize components
-        self.renderer = TerminalRenderer(style=render_style)
-        self.clouds = CloudSystem(self.renderer.width, self.renderer.height)
-        self.typography = LXAITypography(style=logo_style)
-        self.keyboard = KeyboardHandler()
+        self.renderer: TerminalRenderer = TerminalRenderer(style=render_style)
+        self.clouds: CloudSystem = CloudSystem(self.renderer.width, self.renderer.height)
+        self.typography: LXAITypography = LXAITypography(style=logo_style)
+        self.keyboard: KeyboardHandler = KeyboardHandler()
 
         # Animation parameters
-        self.logo_fade_duration = 3.0
-        self.logo_float_amplitude = 3.0
-        self.logo_float_frequency = 0.3
+        self.logo_fade_duration: float = 3.0
+        self.logo_float_amplitude: float = 3.0
+        self.logo_float_frequency: float = 0.3
 
         # Auto-cycling parameters
-        self.auto_cycle_enabled = True
-        self.auto_cycle_interval = 30.0  # in seconds
-        self.last_style_change = 0.0
+        self.auto_cycle_enabled: bool = True
+        self.auto_cycle_interval: float = 30.0  # in seconds
+        self.last_style_change: float = 0.0
 
-    def setup(self):
+    def setup(self) -> None:
         """Setup the animation."""
         self.renderer.hide_cursor()
         self.keyboard.setup()
         self.start_time = time.time()
         self.running = True
 
-    def cleanup(self):
+    def cleanup(self) -> None:
         """Cleanup and restore terminal."""
         self.keyboard.cleanup()
         self.renderer.show_cursor()
         self.renderer.clear_buffer()
         self.renderer.render()
 
-    def handle_input(self):
+    def handle_input(self) -> None:
         """Handle keyboard input."""
         key = self.keyboard.get_key()
         if key:
@@ -71,18 +78,20 @@ class Animation:
                 # Quit the animation
                 self.running = False
 
-    def update(self, delta_time):
+    def update(self, delta_time: float) -> None:
         """Update animation state."""
         self.elapsed_time = time.time() - self.start_time
         self.clouds.update(delta_time)
 
         # Auto-cycle rendering styles every 30 seconds if enabled
-        if self.auto_cycle_enabled:
-            if self.elapsed_time - self.last_style_change >= self.auto_cycle_interval:
-                self.renderer.next_style()
-                self.last_style_change = self.elapsed_time
+        if (
+            self.auto_cycle_enabled
+            and self.elapsed_time - self.last_style_change >= self.auto_cycle_interval
+        ):
+            self.renderer.next_style()
+            self.last_style_change = self.elapsed_time
 
-    def render(self):
+    def render(self) -> None:
         """Render the current frame."""
         # Clear buffer
         self.renderer.clear_buffer()
@@ -92,13 +101,16 @@ class Animation:
 
         # Render LisbonAI typography at bottom-right, fixed position
         self.typography.render_bottom_right(
-            self.renderer, margin_x=10, margin_y=2, opacity=1.0
+            self.renderer,
+            margin_x=10,
+            margin_y=2,
+            opacity=1.0,
         )
 
         # Display to terminal
         self.renderer.render()
 
-    def run(self):
+    def run(self) -> None:
         """Main animation loop."""
         self.setup()
 
@@ -129,12 +141,12 @@ class Animation:
             self.cleanup()
 
 
-def signal_handler(sig, frame):
+def signal_handler(sig: int, frame: FrameType | None) -> None:
     """Handle Ctrl+C gracefully."""
     sys.exit(0)
 
 
-def main():
+def main() -> None:
     """Entry point for the LisbonAI animation."""
     # Setup signal handler
     signal.signal(signal.SIGINT, signal_handler)
