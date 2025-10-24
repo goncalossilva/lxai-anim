@@ -57,7 +57,10 @@ class SSHAnimationSession:
         self.fps: int = fps
         self.frame_time: float = 1.0 / fps
         self.renderer: TerminalRenderer = TerminalRenderer(
-            width=width, height=height, style=render_style, output=channel,
+            width=width,
+            height=height,
+            style=render_style,
+            output=channel,
         )
         self.clouds: CloudSystem = CloudSystem(self.renderer.width, self.renderer.height)
         self.typography: LXAITypography = LXAITypography(style=logo_style)
@@ -145,7 +148,10 @@ class SSHAnimationSession:
         self.renderer.clear_buffer()
         self.clouds.render(self.renderer)
         self.typography.render_bottom_right(
-            self.renderer, margin_x=10, margin_y=2, opacity=1.0,
+            self.renderer,
+            margin_x=10,
+            margin_y=2,
+            opacity=1.0,
         )
 
         frame_data = self.renderer.render_to_string()
@@ -191,7 +197,10 @@ class LXAIAnimationSession(asyncssh.SSHServerSession):
         self.channel = chan
 
     def pty_requested(
-        self, term_type: str, term_size: tuple[int, int, int, int], term_modes: dict[int, int],
+        self,
+        term_type: str,
+        term_size: tuple[int, int, int, int],
+        term_modes: dict[int, int],
     ) -> bool:
         width = height = 0
         if term_size:
