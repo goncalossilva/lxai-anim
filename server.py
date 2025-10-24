@@ -148,7 +148,7 @@ class SSHAnimationSession:
             self.renderer, margin_x=10, margin_y=2, opacity=1.0,
         )
 
-        frame_data = self.renderer.render_to_string()  # type: ignore[attr-defined]
+        frame_data = self.renderer.render_to_string()
         try:
             self.channel.write(frame_data)
             await self._drain_channel()

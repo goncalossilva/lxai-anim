@@ -95,11 +95,15 @@ class TerminalRenderer:
             new_density = max(current_density, density)
             self.set_pixel(x, y, new_density)
 
-    def render(self, output: TextIO | None = None) -> None:
+    def render_to_string(self):
+        """Serialize the buffer to a string with ANSI clear."""
+        body = "\r\n".join("".join(row) for row in self.buffer)
+        return f"\033[2J\033[H{body}\r"
+
+    def render(self, output=None):
         """Render the buffer to the terminal or provided stream."""
-        data = "\r\n".join("".join(row) for row in self.buffer)
-        data = f"\033[2J\033[H{data}\r"
         target = output or self.output
+        data = self.render_to_string()
         target.write(data)
         if hasattr(target, "flush"):
             target.flush()
