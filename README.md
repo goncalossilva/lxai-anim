@@ -14,6 +14,19 @@ uv run main.py
 
 the clouds begin their eternal scroll. bottom-right: **LisbonAI** materializes in whatever form you choose.
 
+### streaming rtmp in ascii
+
+```bash
+uv run main.py --rtmp-url rtmp://your.stream.url/live
+```
+
+renders an rtmp stream in glorious ascii. requires `ffmpeg` installed. when the stream is unavailable or disconnects, it gracefully falls back to the cloud animation—automatically reconnecting when the stream returns.
+
+works over ssh too:
+```bash
+python server.py --rtmp-url rtmp://your.stream.url/live
+```
+
 ## metamorphosis
 
 while dreaming:
@@ -30,11 +43,33 @@ while dreaming:
 ## what even is this
 
 ```
-renderer.py     — the terminal as canvas. dot gradients that shouldn't be possible
-clouds.py       — 3-layer perlin noise system. organic motion from pure mathematics
-typography.py   — 14 ways to say "LisbonAI" in unicode
-keyboard.py     — non-blocking input. the terminal listens while it dreams
-main.py         — 30fps consciousness loop
+renderer.py       — the terminal as canvas. dot gradients that shouldn't be possible
+clouds.py         — 3-layer perlin noise system. organic motion from pure mathematics
+typography.py     — 14 ways to say "LisbonAI" in unicode
+keyboard.py       — non-blocking input. the terminal listens while it dreams
+main.py           — 30fps consciousness loop
+server.py         — ssh server. share the dream remotely
+rtmp_stream.py    — ffmpeg integration. live video becomes ascii
+stream_manager.py — intelligent fallback between stream and clouds
+```
+
+### requirements
+
+base installation via `uv`:
+```bash
+uv sync
+```
+
+for rtmp streaming, install ffmpeg:
+```bash
+# macOS
+brew install ffmpeg
+
+# Ubuntu/Debian
+sudo apt-get install ffmpeg
+
+# Arch
+sudo pacman -S ffmpeg
 ```
 
 technical specs for the convergence-curious:

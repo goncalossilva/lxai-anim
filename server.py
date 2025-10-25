@@ -7,13 +7,18 @@ import stat
 import time
 from contextlib import suppress
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import asyncssh
 
 from clouds import CloudSystem
 from renderer import TerminalRenderer
+from rtmp_stream import RTMPStreamCapture
+from stream_manager import StreamManager
 from typography import LXAITypography
+
+if TYPE_CHECKING:
+    from stream_source import StreamSource
 
 HOST_KEY_FILENAME: str = "ssh_host_key"
 DEFAULT_HOST: str = "0.0.0.0"  # noqa: S104
@@ -52,6 +57,7 @@ class SSHAnimationSession:
         fps: int,
         logo_style: str,
         render_style: str,
+        rtmp_url: str | None = None,
     ) -> None:
         self.channel: Any = channel
         self.fps: int = fps
@@ -62,8 +68,25 @@ class SSHAnimationSession:
             style=render_style,
             output=channel,
         )
-        self.clouds: CloudSystem = CloudSystem(self.renderer.width, self.renderer.height)
         self.typography: LXAITypography = LXAITypography(style=logo_style)
+
+        # Initialize stream source (either RTMP with cloud fallback, or just clouds)
+        clouds = CloudSystem(self.renderer.width, self.renderer.height)
+        if rtmp_url:
+            # Check if ffmpeg is available before attempting to use RTMP
+            if not RTMPStreamCapture.is_ffmpeg_available():
+                channel.write(
+                    "Warning: ffmpeg not found. Install ffmpeg to use RTMP streaming.\r\n"
+                )
+                channel.write("Falling back to cloud animation only.\r\n")
+                self.stream_source: StreamSource = clouds
+            else:
+                rtmp_stream = RTMPStreamCapture(rtmp_url, target_fps=fps)
+                manager = StreamManager(rtmp_stream, clouds, probe_interval=5.0)
+                manager.start(self.renderer.width, self.renderer.height)
+                self.stream_source = manager
+        else:
+            self.stream_source = clouds
 
         self.running: bool = True
         self.auto_cycle_enabled: bool = True
@@ -134,7 +157,7 @@ class SSHAnimationSession:
     def _update(self, delta_time: float) -> None:
         """Update animation state based on elapsed time."""
         self.elapsed_time = time.monotonic() - self.start_time  # type: ignore[operator]
-        self.clouds.update(delta_time)
+        self.stream_source.update(delta_time)
 
         if (
             self.auto_cycle_enabled
@@ -146,7 +169,7 @@ class SSHAnimationSession:
     async def _render_frame(self) -> None:
         """Render a single frame to the SSH channel."""
         self.renderer.clear_buffer()
-        self.clouds.render(self.renderer)
+        self.stream_source.render(self.renderer)
         self.typography.render_bottom_right(
             self.renderer,
             margin_x=10,
@@ -164,6 +187,7 @@ class SSHAnimationSession:
     async def _cleanup(self) -> None:
         """Restore terminal state and clear the screen."""
         try:
+            self.stream_source.cleanup()
             self.renderer.show_cursor()
             self.channel.write("\033[?1049l")
             await self._drain_channel()
@@ -180,7 +204,9 @@ class SSHAnimationSession:
     def resize(self, width: int, height: int) -> None:
         """Handle terminal resizes from the client."""
         self.renderer.resize(width, height)
-        self.clouds.resize(width, height)
+        # Use StreamManager's resize if available, otherwise use stream_source directly
+        if hasattr(self.stream_source, "resize"):
+            self.stream_source.resize(width, height)
 
 
 class LXAIAnimationSession(asyncssh.SSHServerSession):
@@ -222,6 +248,7 @@ class LXAIAnimationSession(asyncssh.SSHServerSession):
             fps=self.config["fps"],
             logo_style=self.config["logo_style"],
             render_style=self.config["render_style"],
+            rtmp_url=self.config.get("rtmp_url"),
         )
         loop = asyncio.get_running_loop()
         self.animation_task = loop.create_task(self.animation.run())
@@ -310,6 +337,11 @@ def parse_args() -> argparse.Namespace:
         choices=["dots", "stipple", "fine", "blocks", "density"],
         help="Character set used for cloud rendering.",
     )
+    parser.add_argument(
+        "--rtmp-url",
+        default=None,
+        help="Optional RTMP stream URL to render in ASCII (requires ffmpeg).",
+    )
     return parser.parse_args()
 
 
@@ -319,6 +351,7 @@ def main() -> None:
         "fps": args.fps,
         "logo_style": args.style,
         "render_style": args.render_style,
+        "rtmp_url": args.rtmp_url,
     }
 
     try:

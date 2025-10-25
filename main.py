@@ -9,16 +9,26 @@ from typing import TYPE_CHECKING
 from clouds import CloudSystem
 from keyboard import KeyboardHandler
 from renderer import TerminalRenderer
+from rtmp_stream import RTMPStreamCapture
+from stream_manager import StreamManager
 from typography import LXAITypography
 
 if TYPE_CHECKING:
     from types import FrameType
 
+    from stream_source import StreamSource
+
 
 class Animation:
     """Main animation controller."""
 
-    def __init__(self, fps: int = 30, logo_style: str = "bold", render_style: str = "dots") -> None:
+    def __init__(
+        self,
+        fps: int = 30,
+        logo_style: str = "bold",
+        render_style: str = "dots",
+        rtmp_url: str | None = None,
+    ) -> None:
         """
         Initialize the animation.
 
@@ -26,6 +36,7 @@ class Animation:
             fps: Target frames per second
             logo_style: Style for the LisbonAI logo
             render_style: Rendering style for dithering
+            rtmp_url: Optional RTMP stream URL to render
         """
         self.fps: int = fps
         self.frame_time: float = 1.0 / fps
@@ -35,9 +46,27 @@ class Animation:
 
         # Initialize components
         self.renderer: TerminalRenderer = TerminalRenderer(style=render_style)
-        self.clouds: CloudSystem = CloudSystem(self.renderer.width, self.renderer.height)
         self.typography: LXAITypography = LXAITypography(style=logo_style)
         self.keyboard: KeyboardHandler = KeyboardHandler()
+
+        # Initialize stream source (either RTMP with cloud fallback, or just clouds)
+        clouds = CloudSystem(self.renderer.width, self.renderer.height)
+        if rtmp_url:
+            # Check if ffmpeg is available before attempting to use RTMP
+            if not RTMPStreamCapture.is_ffmpeg_available():
+                print(
+                    "Warning: ffmpeg not found. Install ffmpeg to use RTMP streaming.",
+                    file=sys.stderr,
+                )
+                print("Falling back to cloud animation only.", file=sys.stderr)
+                self.stream_source: StreamSource = clouds
+            else:
+                rtmp_stream = RTMPStreamCapture(rtmp_url, target_fps=fps)
+                manager = StreamManager(rtmp_stream, clouds, probe_interval=5.0)
+                manager.start(self.renderer.width, self.renderer.height)
+                self.stream_source = manager
+        else:
+            self.stream_source = clouds
 
         # Animation parameters
         self.logo_fade_duration: float = 3.0
@@ -58,6 +87,7 @@ class Animation:
 
     def cleanup(self) -> None:
         """Cleanup and restore terminal."""
+        self.stream_source.cleanup()
         self.keyboard.cleanup()
         self.renderer.show_cursor()
         self.renderer.clear_buffer()
@@ -81,7 +111,7 @@ class Animation:
     def update(self, delta_time: float) -> None:
         """Update animation state."""
         self.elapsed_time = time.time() - self.start_time
-        self.clouds.update(delta_time)
+        self.stream_source.update(delta_time)
 
         # Auto-cycle rendering styles every 30 seconds if enabled
         if (
@@ -96,8 +126,8 @@ class Animation:
         # Clear buffer
         self.renderer.clear_buffer()
 
-        # Render cloud layers
-        self.clouds.render(self.renderer)
+        # Render stream source (RTMP or clouds)
+        self.stream_source.render(self.renderer)
 
         # Render LisbonAI typography at bottom-right, fixed position
         self.typography.render_bottom_right(
@@ -155,6 +185,7 @@ def main() -> None:
     fps = 30
     style = "bold"
     render_style = "dots"
+    rtmp_url = None
 
     if len(sys.argv) > 1:
         if "--fps" in sys.argv:
@@ -172,8 +203,18 @@ def main() -> None:
             if idx + 1 < len(sys.argv):
                 render_style = sys.argv[idx + 1]
 
+        if "--rtmp-url" in sys.argv:
+            idx = sys.argv.index("--rtmp-url")
+            if idx + 1 < len(sys.argv):
+                rtmp_url = sys.argv[idx + 1]
+
     # Run animation
-    animation = Animation(fps=fps, logo_style=style, render_style=render_style)
+    animation = Animation(
+        fps=fps,
+        logo_style=style,
+        render_style=render_style,
+        rtmp_url=rtmp_url,
+    )
     animation.run()
 
 

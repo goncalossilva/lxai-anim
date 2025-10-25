@@ -183,3 +183,15 @@ class CloudSystem:
         for layer in self.layers:
             layer.width = width
             layer.height = height
+
+    def is_available(self) -> bool:
+        """Check if cloud system is available (always True).
+
+        Returns:
+            Always True since clouds are procedurally generated
+        """
+        return True
+
+    def cleanup(self) -> None:
+        """Clean up resources (nothing to clean for procedural clouds)."""
+        pass
