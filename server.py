@@ -11,9 +11,9 @@ from typing import TYPE_CHECKING, Any
 
 import asyncssh
 
-from clouds import CloudSystem
+from clouds import CloudStream
 from renderer import TerminalRenderer
-from rtmp_stream import RTMPStreamCapture
+from rtmp_stream import RTMPStream
 from stream_manager import StreamManager
 from typography import LXAITypography
 
@@ -71,17 +71,17 @@ class SSHAnimationSession:
         self.typography: LXAITypography = LXAITypography(style=logo_style)
 
         # Initialize stream source (either RTMP with cloud fallback, or just clouds)
-        clouds = CloudSystem(self.renderer.width, self.renderer.height)
+        clouds = CloudStream(self.renderer.width, self.renderer.height)
         if rtmp_url:
             # Check if ffmpeg is available before attempting to use RTMP
-            if not RTMPStreamCapture.is_ffmpeg_available():
+            if not RTMPStream.is_ffmpeg_available():
                 channel.write(
                     "Warning: ffmpeg not found. Install ffmpeg to use RTMP streaming.\r\n"
                 )
                 channel.write("Falling back to cloud animation only.\r\n")
                 self.stream_source: StreamSource = clouds
             else:
-                rtmp_stream = RTMPStreamCapture(rtmp_url, target_fps=fps)
+                rtmp_stream = RTMPStream(rtmp_url, target_fps=fps)
                 manager = StreamManager(rtmp_stream, clouds, probe_interval=5.0)
                 manager.start(self.renderer.width, self.renderer.height)
                 self.stream_source = manager

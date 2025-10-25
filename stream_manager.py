@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from renderer import TerminalRenderer
-    from rtmp_stream import RTMPStreamCapture
+    from rtmp_stream import RTMPStream
     from stream_source import StreamSource
 
 
@@ -17,15 +17,15 @@ class StreamManager:
 
     def __init__(
         self,
-        rtmp_stream: RTMPStreamCapture | None,
+        rtmp_stream: RTMPStream | None,
         fallback_source: StreamSource,
         probe_interval: float = 5.0,
     ) -> None:
         """Initialize stream manager.
 
         Args:
-            rtmp_stream: RTMP stream capture (primary source)
-            fallback_source: Fallback animation source (e.g., CloudSystem)
+            rtmp_stream: RTMP stream (primary source)
+            fallback_source: Fallback animation source (e.g., CloudStream)
             probe_interval: How often to probe for stream availability in seconds
         """
         self.rtmp_stream = rtmp_stream

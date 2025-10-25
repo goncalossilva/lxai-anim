@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     from renderer import TerminalRenderer
 
 
-class RTMPStreamCapture:
+class RTMPStream:
     """Captures RTMP stream via ffmpeg and converts to ASCII."""
 
     def __init__(self, rtmp_url: str, target_fps: int = 10) -> None:
@@ -52,7 +52,7 @@ class RTMPStreamCapture:
         Returns:
             True if stream is available, False otherwise
         """
-        if not RTMPStreamCapture.is_ffmpeg_available():
+        if not RTMPStream.is_ffmpeg_available():
             return False
 
         try:

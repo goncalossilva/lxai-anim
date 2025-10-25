@@ -88,7 +88,7 @@ class CloudLayer:
         return 1.0 - 0.5 * pow(2 * (1 - value), power)
 
 
-class CloudSystem:
+class CloudStream:
     """Manages multiple parallax cloud layers."""
 
     def __init__(self, width: int, height: int) -> None:
