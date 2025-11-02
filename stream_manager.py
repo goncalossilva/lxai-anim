@@ -87,22 +87,20 @@ class StreamManager:
                 self.using_rtmp = False
                 self.stream_started = False
 
-        # If using fallback, periodically probe for RTMP availability
-        elif (
-            not self.using_rtmp
-            and self.rtmp_stream
-            and current_time - self.last_probe_time >= self.probe_interval
-        ):
-            self.last_probe_time = current_time
+        # If using fallback, manage probing and reconnection
+        elif not self.using_rtmp and self.rtmp_stream:
+            # Start a new probe every probe_interval seconds
+            if current_time - self.last_probe_time >= self.probe_interval:
+                self.last_probe_time = current_time
 
-            # Start background probe if not already running
-            if self.probe_thread is None or not self.probe_thread.is_alive():
-                self.probe_thread = threading.Thread(
-                    target=self._probe_stream_background, daemon=True
-                )
-                self.probe_thread.start()
+                # Start background probe if not already running
+                if self.probe_thread is None or not self.probe_thread.is_alive():
+                    self.probe_thread = threading.Thread(
+                        target=self._probe_stream_background, daemon=True
+                    )
+                    self.probe_thread.start()
 
-            # Check if probe completed and stream is available
+            # Check probe result every frame (not just when starting new probe)
             with self.probe_lock:
                 if self.probe_result and self.terminal_size:
                     # Stream is available, try to reconnect
