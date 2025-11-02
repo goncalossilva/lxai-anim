@@ -15,7 +15,6 @@ from clouds import CloudStream
 from renderer import TerminalRenderer
 from rtmp_stream import RTMPStream
 from stream_manager import StreamManager
-from typography import LXAITypography
 
 if TYPE_CHECKING:
     from stream_source import StreamSource
@@ -68,10 +67,9 @@ class SSHAnimationSession:
             style=render_style,
             output=channel,
         )
-        self.typography: LXAITypography = LXAITypography(style=logo_style)
 
         # Initialize stream source (either RTMP with cloud fallback, or just clouds)
-        clouds = CloudStream(self.renderer.width, self.renderer.height)
+        clouds = CloudStream(self.renderer.width, self.renderer.height, logo_style=logo_style)
         if rtmp_url:
             # Check if ffmpeg is available before attempting to use RTMP
             if not RTMPStream.is_ffmpeg_available():
@@ -150,7 +148,8 @@ class SSHAnimationSession:
                 self.auto_cycle_enabled = False
                 self.renderer.next_style()
             elif key == "m":
-                self.typography.next_style()
+                if hasattr(self.stream_source, "next_logo_style"):
+                    self.stream_source.next_logo_style()
             elif key == "q" or key in ("\x03", "\x04"):  # q, Ctrl+C, or Ctrl+D
                 self.running = False
 
@@ -170,12 +169,6 @@ class SSHAnimationSession:
         """Render a single frame to the SSH channel."""
         self.renderer.clear_buffer()
         self.stream_source.render(self.renderer)
-        self.typography.render_bottom_right(
-            self.renderer,
-            margin_x=10,
-            margin_y=2,
-            opacity=1.0,
-        )
 
         frame_data = self.renderer.render_to_string()
         try:

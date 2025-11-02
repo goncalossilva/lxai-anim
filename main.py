@@ -11,7 +11,6 @@ from keyboard import KeyboardHandler
 from renderer import TerminalRenderer
 from rtmp_stream import RTMPStream
 from stream_manager import StreamManager
-from typography import LXAITypography
 
 if TYPE_CHECKING:
     from types import FrameType
@@ -46,11 +45,10 @@ class Animation:
 
         # Initialize components
         self.renderer: TerminalRenderer = TerminalRenderer(style=render_style)
-        self.typography: LXAITypography = LXAITypography(style=logo_style)
         self.keyboard: KeyboardHandler = KeyboardHandler()
 
         # Initialize stream source (either RTMP with cloud fallback, or just clouds)
-        clouds = CloudStream(self.renderer.width, self.renderer.height)
+        clouds = CloudStream(self.renderer.width, self.renderer.height, logo_style=logo_style)
         if rtmp_url:
             # Check if ffmpeg is available before attempting to use RTMP
             if not RTMPStream.is_ffmpeg_available():
@@ -67,11 +65,6 @@ class Animation:
                 self.stream_source = manager
         else:
             self.stream_source = clouds
-
-        # Animation parameters
-        self.logo_fade_duration: float = 3.0
-        self.logo_float_amplitude: float = 3.0
-        self.logo_float_frequency: float = 0.3
 
         # Auto-cycling parameters
         self.auto_cycle_enabled: bool = True
@@ -103,7 +96,8 @@ class Animation:
                 self.renderer.next_style()
             elif key == "m":
                 # Cycle to next text/logo style
-                self.typography.next_style()
+                if hasattr(self.stream_source, "next_logo_style"):
+                    self.stream_source.next_logo_style()
             elif key == "q":
                 # Quit the animation
                 self.running = False
@@ -126,16 +120,8 @@ class Animation:
         # Clear buffer
         self.renderer.clear_buffer()
 
-        # Render stream source (RTMP or clouds)
+        # Render stream source (RTMP or clouds with logo)
         self.stream_source.render(self.renderer)
-
-        # Render LisbonAI typography at bottom-right, fixed position
-        self.typography.render_bottom_right(
-            self.renderer,
-            margin_x=10,
-            margin_y=2,
-            opacity=1.0,
-        )
 
         # Display to terminal
         self.renderer.render()

@@ -8,6 +8,8 @@ import noise
 if TYPE_CHECKING:
     from renderer import TerminalRenderer
 
+from typography import LXAITypography
+
 
 class CloudLayer:
     """A single parallax cloud layer using Perlin noise."""
@@ -89,13 +91,20 @@ class CloudLayer:
 
 
 class CloudStream:
-    """Manages multiple parallax cloud layers."""
+    """Manages multiple parallax cloud layers with logo overlay."""
 
-    def __init__(self, width: int, height: int) -> None:
-        """Initialize the cloud system with multiple layers."""
+    def __init__(self, width: int, height: int, logo_style: str = "bold") -> None:
+        """Initialize the cloud system with multiple layers.
+
+        Args:
+            width: Width of the rendering area
+            height: Height of the rendering area
+            logo_style: Typography style for the LisbonAI logo
+        """
         self.width: int = width
         self.height: int = height
         self.layers: list[CloudLayer] = []
+        self.typography: LXAITypography = LXAITypography(style=logo_style)
 
         # Create multiple cloud layers with different parameters
         # Background layer - slow, large features, subtle
@@ -164,11 +173,20 @@ class CloudStream:
         return max(0.0, min(1.0, total_density))
 
     def render(self, renderer: TerminalRenderer) -> None:
-        """Render all cloud layers to the renderer."""
+        """Render all cloud layers and logo to the renderer."""
+        # Render clouds
         for y in range(renderer.height):
             for x in range(renderer.width):
                 density = self.get_combined_density(x, y)
                 renderer.set_pixel(x, y, density)
+
+        # Render LisbonAI logo at bottom-right
+        self.typography.render_bottom_right(
+            renderer,
+            margin_x=10,
+            margin_y=2,
+            opacity=1.0,
+        )
 
     def resize(self, width: int, height: int) -> None:
         """
@@ -183,6 +201,10 @@ class CloudStream:
         for layer in self.layers:
             layer.width = width
             layer.height = height
+
+    def next_logo_style(self) -> None:
+        """Cycle to the next logo typography style."""
+        self.typography.next_style()
 
     def is_available(self) -> bool:
         """Check if cloud system is available (always True).

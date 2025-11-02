@@ -146,6 +146,19 @@ class StreamManager:
         """
         return True
 
+    def is_using_rtmp(self) -> bool:
+        """Check if currently using RTMP stream (vs fallback).
+
+        Returns:
+            True if using RTMP stream, False if using fallback
+        """
+        return self.using_rtmp
+
+    def next_logo_style(self) -> None:
+        """Cycle logo style on the fallback source (CloudStream)."""
+        if hasattr(self.fallback_source, "next_logo_style"):
+            self.fallback_source.next_logo_style()
+
     def cleanup(self) -> None:
         """Clean up all resources."""
         if self.rtmp_stream:
