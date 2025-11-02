@@ -331,9 +331,9 @@ def parse_args() -> argparse.Namespace:
         help="Character set used for cloud rendering.",
     )
     parser.add_argument(
-        "--rtmp-url",
+        "--stream-url",
         default=None,
-        help="Optional RTMP stream URL to render in ASCII (requires ffmpeg).",
+        help="Stream URL to render in ASCII (RTMP/HLS/RTSP; requires ffmpeg).",
     )
     return parser.parse_args()
 
@@ -344,7 +344,7 @@ def main() -> None:
         "fps": args.fps,
         "logo_style": args.style,
         "render_style": args.render_style,
-        "rtmp_url": args.rtmp_url,
+        "rtmp_url": args.stream_url,
     }
 
     try:

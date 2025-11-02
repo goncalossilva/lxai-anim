@@ -14,17 +14,24 @@ uv run main.py
 
 the clouds begin their eternal scroll. bottom-right: **LisbonAI** materializes in whatever form you choose.
 
-### streaming rtmp in ascii
+### streaming live video in ascii
 
 ```bash
-uv run main.py --rtmp-url rtmp://your.stream.url/live
+# RTMP streams
+uv run main.py --stream-url rtmp://your.stream.url/live
+
+# HLS streams (m3u8)
+uv run main.py --stream-url https://example.com/stream/index.m3u8
+
+# RTSP streams
+uv run main.py --stream-url rtsp://camera.local/stream
 ```
 
-renders an rtmp stream in glorious ascii. requires `ffmpeg` installed. when the stream is unavailable or disconnects, it gracefully falls back to the cloud animation—automatically reconnecting when the stream returns.
+renders live video streams in glorious ascii. supports any format ffmpeg handles: **RTMP**, **HLS (m3u8)**, **RTSP**, and more. requires `ffmpeg` installed. when the stream is unavailable or disconnects, it gracefully falls back to the cloud animation—automatically reconnecting when the stream returns.
 
 works over ssh too:
 ```bash
-python server.py --rtmp-url rtmp://your.stream.url/live
+python server.py --stream-url https://example.com/stream/index.m3u8
 ```
 
 ## metamorphosis
@@ -49,7 +56,7 @@ typography.py     — 14 ways to say "LisbonAI" in unicode
 keyboard.py       — non-blocking input. the terminal listens while it dreams
 main.py           — 30fps consciousness loop
 server.py         — ssh server. share the dream remotely
-rtmp_stream.py    — ffmpeg integration. live video becomes ascii
+rtmp_stream.py    — ffmpeg integration. live streams (RTMP/HLS/RTSP) become ascii
 stream_manager.py — intelligent fallback between stream and clouds
 ```
 
@@ -60,7 +67,7 @@ base installation via `uv`:
 uv sync
 ```
 
-for rtmp streaming, install ffmpeg:
+for live streaming, install ffmpeg:
 ```bash
 # macOS
 brew install ffmpeg

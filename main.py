@@ -171,7 +171,7 @@ def main() -> None:
     fps = 30
     style = "bold"
     render_style = "dots"
-    rtmp_url = None
+    stream_url = None
 
     if len(sys.argv) > 1:
         if "--fps" in sys.argv:
@@ -189,17 +189,17 @@ def main() -> None:
             if idx + 1 < len(sys.argv):
                 render_style = sys.argv[idx + 1]
 
-        if "--rtmp-url" in sys.argv:
-            idx = sys.argv.index("--rtmp-url")
+        if "--stream-url" in sys.argv:
+            idx = sys.argv.index("--stream-url")
             if idx + 1 < len(sys.argv):
-                rtmp_url = sys.argv[idx + 1]
+                stream_url = sys.argv[idx + 1]
 
     # Run animation
     animation = Animation(
         fps=fps,
         logo_style=style,
         render_style=render_style,
-        rtmp_url=rtmp_url,
+        rtmp_url=stream_url,
     )
     animation.run()
 
