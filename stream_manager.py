@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-import sys
+import threading
 import time
 from typing import TYPE_CHECKING
 
@@ -37,6 +37,11 @@ class StreamManager:
         self.stream_started = False
         self.terminal_size: tuple[int, int] | None = None
 
+        # Background probing state
+        self.probe_thread: threading.Thread | None = None
+        self.probe_result: bool = False
+        self.probe_lock = threading.Lock()
+
     def start(self, width: int, height: int) -> None:
         """Start the stream manager with given terminal dimensions.
 
@@ -52,14 +57,16 @@ class StreamManager:
                 self.current_source = self.rtmp_stream
                 self.using_rtmp = True
                 self.stream_started = True
-                print("RTMP stream connected", file=sys.stderr)
             else:
-                print(
-                    "Failed to connect to RTMP stream, using fallback animation",
-                    file=sys.stderr,
-                )
                 self.current_source = self.fallback_source
                 self.using_rtmp = False
+
+    def _probe_stream_background(self) -> None:
+        """Background thread function to probe stream availability."""
+        if self.rtmp_stream:
+            result = self.rtmp_stream.probe_stream(self.rtmp_stream.rtmp_url)
+            with self.probe_lock:
+                self.probe_result = result
 
     def update(self, time_delta: float) -> None:
         """Update the current active source.
@@ -74,11 +81,8 @@ class StreamManager:
             self.rtmp_stream.update(time_delta)
 
             if not self.rtmp_stream.is_available():
-                # RTMP stream disconnected, switch to fallback
-                print(
-                    "RTMP stream disconnected, switching to fallback animation",
-                    file=sys.stderr,
-                )
+                # RTMP stream disconnected, properly stop it and switch to fallback
+                self.rtmp_stream.stop()
                 self.current_source = self.fallback_source
                 self.using_rtmp = False
                 self.stream_started = False
@@ -91,18 +95,23 @@ class StreamManager:
         ):
             self.last_probe_time = current_time
 
-            # Probe stream availability
-            if self.rtmp_stream.probe_stream(self.rtmp_stream.rtmp_url) and self.terminal_size:
-                # Stream is available, try to reconnect
-                width, height = self.terminal_size
-                if self.rtmp_stream.start(width, height):
-                    print(
-                        "RTMP stream reconnected, switching from fallback",
-                        file=sys.stderr,
-                    )
-                    self.current_source = self.rtmp_stream
-                    self.using_rtmp = True
-                    self.stream_started = True
+            # Start background probe if not already running
+            if self.probe_thread is None or not self.probe_thread.is_alive():
+                self.probe_thread = threading.Thread(
+                    target=self._probe_stream_background, daemon=True
+                )
+                self.probe_thread.start()
+
+            # Check if probe completed and stream is available
+            with self.probe_lock:
+                if self.probe_result and self.terminal_size:
+                    # Stream is available, try to reconnect
+                    width, height = self.terminal_size
+                    if self.rtmp_stream.start(width, height):
+                        self.current_source = self.rtmp_stream
+                        self.using_rtmp = True
+                        self.stream_started = True
+                    self.probe_result = False  # Reset for next probe
 
         # Update the current active source
         self.current_source.update(time_delta)
@@ -124,16 +133,16 @@ class StreamManager:
         """
         self.terminal_size = (width, height)
 
+        # Resize fallback source (CloudStream)
+        if hasattr(self.fallback_source, "resize"):
+            self.fallback_source.resize(width, height)
+
         # If using RTMP, restart with new dimensions
         if self.using_rtmp and self.rtmp_stream:
             self.rtmp_stream.stop()
             if self.rtmp_stream.start(width, height):
                 self.stream_started = True
             else:
-                print(
-                    "Failed to restart RTMP stream after resize",
-                    file=sys.stderr,
-                )
                 self.current_source = self.fallback_source
                 self.using_rtmp = False
                 self.stream_started = False
@@ -161,6 +170,10 @@ class StreamManager:
 
     def cleanup(self) -> None:
         """Clean up all resources."""
+        # Wait for probe thread to complete if running
+        if self.probe_thread and self.probe_thread.is_alive():
+            self.probe_thread.join(timeout=1.0)
+
         if self.rtmp_stream:
             self.rtmp_stream.cleanup()
         self.fallback_source.cleanup()
